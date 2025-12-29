@@ -1,0 +1,101 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 10 10 15;
+    --foreground: 255 255 255;
+    --primary: 0 242 255;
+    --neon-magenta: 255 0 229;
+  }
+
+  body {
+    @apply bg-dark text-white antialiased font-sans;
+    background-image: 
+      radial-gradient(circle at 50% -20%, rgba(0, 242, 255, 0.05), transparent 50%),
+      radial-gradient(circle at 0% 100%, rgba(255, 0, 229, 0.05), transparent 50%);
+    background-attachment: fixed;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-display tracking-tight text-white;
+  }
+
+  .font-display {
+    @apply tracking-tight text-white;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply bg-dark-panel backdrop-blur-md border border-white/10 shadow-2xl;
+  }
+  
+  .glass-button {
+    @apply bg-white/5 backdrop-blur-sm border border-white/20 hover:bg-white/10 hover:border-white/30 transition-all duration-300;
+  }
+
+  .neon-border-cyan {
+    @apply border-primary/50 shadow-[0_0_15px_rgba(0,242,255,0.3)];
+  }
+
+  .neon-border-magenta {
+    @apply border-primary-magenta/50 shadow-[0_0_15px_rgba(255,0,229,0.3)];
+  }
+
+  .neon-text-cyan {
+    @apply text-primary drop-shadow-[0_0_8px_rgba(0,242,255,0.5)];
+  }
+
+  .neon-text-magenta {
+    @apply text-primary-magenta drop-shadow-[0_0_8px_rgba(255,0,229,0.5)];
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .animate-vault-open {
+    animation: vault-open 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .animate-glow {
+    animation: glow 3s ease-in-out infinite alternate;
+  }
+  
+  @keyframes vault-open {
+    0% { transform: scale(0.9) rotateY(-90deg); opacity: 0; }
+    100% { transform: scale(1) rotateY(0); opacity: 1; }
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  @keyframes glow {
+    0% { filter: drop-shadow(0 0 5px rgba(0, 242, 255, 0.3)); }
+    100% { filter: drop-shadow(0 0 20px rgba(0, 242, 255, 0.6)); }
+  }
+
+  .animate-slide-left {
+    animation: slide-left 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  @keyframes slide-left {
+    from { transform: translateX(20px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+}
