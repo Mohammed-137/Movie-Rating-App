@@ -14,12 +14,15 @@ dotenv.config();
 const app = express();
 
 // Middleware
-app.use(cors({
-  origin: true, // Reflects the request origin, allowing all origins
+const corsOptions = {
+  origin: true,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
-}));
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions)); // Enable pre-flight for all routes
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
