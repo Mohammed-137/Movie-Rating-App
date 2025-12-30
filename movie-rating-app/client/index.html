@@ -1,6 +1,30 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <script>
+      /**
+       * EARLY-STAGE CONSOLE FILTER
+       * Silences external/Vercel warnings before any other scripts run.
+       */
+      (function() {
+        const silentStrings = [
+          'zustand',
+          'message channel closed',
+          'DialogContent requires a DialogTitle'
+        ];
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        const filter = (original, args) => {
+          const msg = args[0];
+          if (typeof msg === 'string' && silentStrings.some(s => msg.indexOf(s) !== -1)) return;
+          original.apply(console, args);
+        };
+
+        console.error = function() { filter(originalError, arguments); };
+        console.warn = function() { filter(originalWarn, arguments); };
+      })();
+    </script>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
