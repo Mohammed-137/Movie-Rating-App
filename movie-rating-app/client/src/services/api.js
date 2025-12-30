@@ -4,6 +4,9 @@ if (!apiBase.endsWith('/api')) {
   apiBase += '/api';
 }
 const API_BASE_URL = apiBase;
+console.log('--- CINEMORA API Initialization ---');
+console.log('Resolved API_BASE_URL:', API_BASE_URL);
+console.log('------------------------------------');
 
 /**
  * Generic API request handler
