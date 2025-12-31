@@ -1,11 +1,20 @@
-let apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-apiBase = apiBase.replace(/\/$/, '');
-if (!apiBase.endsWith('/api')) {
-  apiBase += '/api';
-}
-const API_BASE_URL = apiBase;
+const getApiBaseUrl = () => {
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL.replace(/\/$/, '') + '/api';
+  }
+  
+  if (import.meta.env.PROD) {
+
+    return '/api'; 
+  }
+
+  return 'http://localhost:5000/api';
+};
+
+const API_BASE_URL = getApiBaseUrl();
 console.log('--- CINEMORA API Initialization ---');
 console.log('Resolved API_BASE_URL:', API_BASE_URL);
+console.log('Current Environment:', import.meta.env.MODE);
 console.log('------------------------------------');
 
 /**
