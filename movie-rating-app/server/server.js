@@ -34,7 +34,7 @@ connectDB().then(() => {
 // Routes
 app.get('/', (req, res) => {
   res.json({
-    message: '🎬 Movie Rating API Server',
+    message: ' Movie Rating API Server',
     version: '1.0.0',
     endpoints: {
       users: '/api/users',
@@ -61,9 +61,9 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 5000;
 if (process.env.VERCEL !== '1') {
   app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
-    console.log(`🌐 API available at http://localhost:${PORT}`);
-    console.log(`📱 Client URL: ${process.env.CLIENT_URL}`);
+    console.log(` Server running on port ${PORT}`);
+    console.log(` API available at http://localhost:${PORT}`);
+    console.log(` Client URL: ${process.env.CLIENT_URL}`);
   });
 }
 

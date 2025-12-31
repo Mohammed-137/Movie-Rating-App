@@ -1,14 +1,20 @@
 const getApiBaseUrl = () => {
+  let baseUrl = '';
+  
   if (import.meta.env.VITE_API_URL) {
-    return import.meta.env.VITE_API_URL.replace(/\/$/, '') + '/api';
+    baseUrl = import.meta.env.VITE_API_URL.replace(/\/$/, '');
+  } else if (import.meta.env.PROD) {
+    baseUrl = ''; 
+  } else {
+    baseUrl = 'http://localhost:5000';
+  }
+
+  // Only append /api if the base URL doesn't already contain it
+  if (!baseUrl.endsWith('/api') && !baseUrl.includes('/api/')) {
+    baseUrl = `${baseUrl}/api`;
   }
   
-  if (import.meta.env.PROD) {
-
-    return '/api'; 
-  }
-
-  return 'http://localhost:5000/api';
+  return baseUrl;
 };
 
 const API_BASE_URL = getApiBaseUrl();
@@ -28,7 +34,15 @@ const apiRequest = async (endpoint, options = {}) => {
       ...options,
     });
 
-    const data = await response.json();
+    // Check if the response is actually JSON before parsing
+    const contentType = response.headers.get('content-type');
+    let data;
+    if (contentType && contentType.includes('application/json')) {
+      data = await response.json();
+    } else {
+      const text = await response.text();
+      throw new Error(`Expected JSON but received: ${text.substring(0, 100)}...`);
+    }
 
     if (!response.ok) {
       throw new Error(data.message || 'API request failed');

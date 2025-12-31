@@ -8,7 +8,7 @@ const initAdmin = async () => {
         const existingAdmin = await User.findOne({ email: adminEmail });
         
         if (!existingAdmin) {
-            console.log('🚀 Initializing Default Admin...');
+            console.log(' Initializing Default Admin...');
             await User.create({
                 name: 'Lovely Yasar',
                 email: adminEmail,
@@ -16,17 +16,17 @@ const initAdmin = async () => {
                 role: 'admin',
                 subscriptionTier: 'premium'
             });
-            console.log('✅ Default Admin Created Successfully.');
+            console.log(' Default Admin Created Successfully.');
         } else {
-            // Force sync password and roles to ensure hashing is correct and permissions are set
+          
             existingAdmin.password = adminPassword;
             existingAdmin.role = 'admin';
             existingAdmin.subscriptionTier = 'premium';
             await existingAdmin.save();
-            console.log('✅ Admin credentials and permissions synchronized.');
+            console.log(' Admin credentials and permissions synchronized.');
         }
     } catch (error) {
-        console.error('❌ Error initializing admin:', error.message);
+        console.error(' Error initializing admin:', error.message);
     }
 };
 

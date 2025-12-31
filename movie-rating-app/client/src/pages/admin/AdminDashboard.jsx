@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   LayoutDashboard, 
   Film, 
@@ -41,29 +41,7 @@ const AddMovieForm = ({ isOpen, onClose, onSave, editingMovie = null }) => {
         section: 'New'
     });
 
-    useEffect(() => {
-        if (editingMovie) {
-            setFormData(editingMovie);
-        } else if (isOpen) {
-             setFormData({
-                title: '',
-                description: '',
-                duration: '',
-                poster: '',
-                backdrop: '',
-                trailer: '',
-                previewTrailer: '',
-                premiumTrailer: '',
-                isPremiumOnly: false,
-                earlyAccessDate: '',
-                releaseDate: '',
-                language: 'English',
-                genre: '',
-                certification: 'PG-13',
-                section: 'New'
-            });
-        }
-    }, [editingMovie, isOpen]);
+    // useEffect removed - using key prop for state reset
 
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -430,6 +408,7 @@ const MovieManager = () => {
             </div>
 
             <AddMovieForm 
+                key={isFormOpen ? 'new' : editingMovie?.id || 'closed'}
                 isOpen={isFormOpen || !!editingMovie} 
                 onClose={() => { setIsFormOpen(false); setEditingMovie(null); }}
                 onSave={handleSave}

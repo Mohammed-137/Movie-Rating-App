@@ -92,7 +92,7 @@ const Navbar = () => {
                 <div className="flex flex-col">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium hidden lg:block">{user.name}</span>
-                    {user.subscriptionTier === 'premium' && (
+                    {user.subscriptionTier === 'premium' && user.role !== 'admin' && (
                       <span className="bg-primary/20 border border-primary/30 text-primary text-[8px] px-2 py-0.5 rounded-full font-black tracking-tighter shrink-0">
                         PREMIUM
                       </span>

@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }) => {
         try {
           const res = await authAPI.getMe();
           setUser(res.data);
-        } catch (error) {
+        } catch {
           console.error('Session expired or invalid token');
           localStorage.removeItem('movieAppToken');
           setUser(null);
@@ -101,27 +101,19 @@ export const AuthProvider = ({ children }) => {
   const isWatchLater = (movieId) => watchLater.some(m => m.id === movieId);
 
   const login = async (email, password) => {
-    try {
-      const res = await authAPI.login({ email, password });
-      const { token, ...userData } = res.data;
-      localStorage.setItem('movieAppToken', token);
-      setUser(userData);
-      return userData;
-    } catch (error) {
-      throw error;
-    }
+    const res = await authAPI.login({ email, password });
+    const { token, ...userData } = res.data;
+    localStorage.setItem('movieAppToken', token);
+    setUser(userData);
+    return userData;
   };
 
   const register = async (name, email, password) => {
-    try {
-      const res = await authAPI.register({ name, email, password });
-      const { token, ...userData } = res.data;
-      localStorage.setItem('movieAppToken', token);
-      setUser(userData);
-      return userData;
-    } catch (error) {
-      throw error;
-    }
+    const res = await authAPI.register({ name, email, password });
+    const { token, ...userData } = res.data;
+    localStorage.setItem('movieAppToken', token);
+    setUser(userData);
+    return userData;
   };
 
   const logout = () => {
@@ -151,7 +143,7 @@ export const AuthProvider = ({ children }) => {
     favorites, watchLater, reviews,
     toggleFavorite, toggleWatchLater, addReview, deleteReview,
     isFavorite, isWatchLater, updateUserStatus,
-    upgradeSubscription: (userId) => {
+    upgradeSubscription: () => {
       setUser(prev => ({ ...prev, subscriptionTier: 'premium' }));
     }
   };

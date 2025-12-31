@@ -5,16 +5,14 @@ import { protect } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// Generate Token
+
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET || 'secret_key_135', {
     expiresIn: '30d',
   });
 };
 
-// @desc    Register a new user
-// @route   POST /api/auth/register
-// @access  Public
+
 router.post('/register', async (req, res) => {
   const { name, email, password } = req.body;
 
@@ -51,9 +49,6 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// @desc    Authenticate a user
-// @route   POST /api/auth/login
-// @access  Public
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
@@ -80,9 +75,7 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// @desc    Get user profile
-// @route   GET /api/auth/me
-// @access  Private
+
 router.get('/me', protect, async (req, res) => {
   try {
     const user = await User.findById(req.user._id);

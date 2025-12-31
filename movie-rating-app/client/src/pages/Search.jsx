@@ -37,7 +37,7 @@ const Search = () => {
     });
 
     return results;
-  }, [query]);
+  }, [query, allMovies]);
 
   return (
     <div className="bg-dark min-h-screen pt-20">
