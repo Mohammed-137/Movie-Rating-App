@@ -12,10 +12,6 @@ const getApiBaseUrl = () => {
 };
 
 const API_BASE_URL = getApiBaseUrl();
-console.log('--- CINEMORA API Initialization ---');
-console.log('Resolved API_BASE_URL:', API_BASE_URL);
-console.log('Current Environment:', import.meta.env.MODE);
-console.log('------------------------------------');
 
 /**
  * Generic API request handler

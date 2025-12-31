@@ -3,26 +3,29 @@
   <head>
     <script>
       /**
-       * EARLY-STAGE CONSOLE FILTER
-       * Silences external/Vercel warnings before any other scripts run.
+       * AGGRESSIVE CONSOLE FILTER
+       * Silences external/internal warnings before any other scripts run.
        */
       (function() {
         const silentStrings = [
           'zustand',
           'message channel closed',
-          'DialogContent requires a DialogTitle'
+          'DialogContent requires a DialogTitle',
+          '[DEPRECATED]',
+          'asynchronous response',
+          'message channel closed'
         ];
-        const originalError = console.error;
-        const originalWarn = console.warn;
+        const methods = ['log', 'warn', 'error', 'info'];
         
-        const filter = (original, args) => {
-          const msg = args[0];
-          if (typeof msg === 'string' && silentStrings.some(s => msg.indexOf(s) !== -1)) return;
-          original.apply(console, args);
-        };
-
-        console.error = function() { filter(originalError, arguments); };
-        console.warn = function() { filter(originalWarn, arguments); };
+        methods.forEach(method => {
+          const original = console[method];
+          console[method] = function() {
+            const args = Array.from(arguments);
+            const msg = args.join(' ').toLowerCase();
+            if (typeof msg === 'string' && silentStrings.some(s => msg.indexOf(s.toLowerCase()) !== -1)) return;
+            original.apply(console, args);
+          };
+        });
       })();
     </script>
     <meta charset="UTF-8" />
@@ -31,7 +34,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
-    <title>CINEMORA - Your Movie Experience</title>
+    <title>CINEMORA - Movie Review App</title>
   </head>
   <body>
     <div id="root"></div>
