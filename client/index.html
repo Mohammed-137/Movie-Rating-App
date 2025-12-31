@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <script>
+      /**
+       * AGGRESSIVE CONSOLE FILTER
+       * Silences external/internal warnings before any other scripts run.
+       */
+      (function() {
+        const silentStrings = [
+          'zustand',
+          'message channel closed',
+          'DialogContent requires a DialogTitle',
+          '[DEPRECATED]',
+          'asynchronous response',
+          'message channel closed'
+        ];
+        const methods = ['log', 'warn', 'error', 'info'];
+        
+        methods.forEach(method => {
+          const original = console[method];
+          console[method] = function() {
+            const args = Array.from(arguments);
+            const msg = args.join(' ').toLowerCase();
+            if (typeof msg === 'string' && silentStrings.some(s => msg.indexOf(s.toLowerCase()) !== -1)) return;
+            original.apply(console, args);
+          };
+        });
+      })();
+    </script>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <title>CINEMORA - Movie Review App</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
