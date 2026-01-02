@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   LayoutDashboard, 
   Film, 
@@ -20,6 +20,7 @@ import {
 import { useMovies } from '../../context/MovieContext';
 import { useAuth } from '../../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
+import { userAPI } from '../../services/api';
 
 // Placeholder sub-components (will build these out next)
 const AddMovieForm = ({ isOpen, onClose, onSave, editingMovie = null }) => {
@@ -237,17 +238,41 @@ const AddMovieForm = ({ isOpen, onClose, onSave, editingMovie = null }) => {
 };
 
 const UserManager = () => {
-    const [users, setUsers] = useState(() => {
-        const stored = localStorage.getItem('movieAppRegisteredUsers');
-        return stored ? JSON.parse(stored) : [];
-    });
+    const [users, setUsers] = useState([]);
+    const [loading, setLoading] = useState(true);
     const { updateUserStatus } = useAuth();
 
-    const handleStatusToggle = (userId, currentStatus) => {
+    useEffect(() => {
+        const fetchUsers = async () => {
+            try {
+                const data = await userAPI.getAll();
+                setUsers(data);
+            } catch (error) {
+                console.error('Failed to fetch users:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchUsers();
+    }, []);
+
+    const handleStatusToggle = async (userId, currentStatus) => {
         const newStatus = currentStatus === 'active' ? 'suspended' : 'active';
-        updateUserStatus(userId, newStatus);
-        setUsers(prev => prev.map(u => u.id === userId ? { ...u, status: newStatus } : u));
+        try {
+            await updateUserStatus(userId, newStatus);
+            setUsers(prev => prev.map(u => u._id === userId ? { ...u, status: newStatus } : u));
+        } catch (error) {
+            alert('Failed to update user status');
+        }
     };
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center py-20">
+                <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        );
+    }
 
     return (
         <div className="animate-vault-open">
@@ -265,11 +290,11 @@ const UserManager = () => {
                     </thead>
                     <tbody className="divide-y divide-white/5">
                         {users.map((u) => (
-                            <tr key={u.id} className="hover:bg-white/[0.02] transition-colors group">
+                            <tr key={u._id} className="hover:bg-white/[0.02] transition-colors group">
                                 <td className="px-6 py-4">
                                     <div className="flex items-center gap-4">
-                                        <div className="w-10 h-10 rounded-full overflow-hidden border border-white/10">
-                                            <img src={u.avatar} alt="" className="w-full h-full object-cover" />
+                                        <div className="w-10 h-10 rounded-full overflow-hidden border border-white/10 flex items-center justify-center bg-white/5 text-primary text-xs font-bold">
+                                            {u.name.substring(0, 2).toUpperCase()}
                                         </div>
                                         <div>
                                             <h4 className="text-sm font-bold text-white">{u.name}</h4>
@@ -283,7 +308,7 @@ const UserManager = () => {
                                     </span>
                                 </td>
                                 <td className="px-6 py-4">
-                                    <span className="text-xs text-gray-400 font-mono">ID: {u.id.substring(0, 8)}...</span>
+                                    <span className="text-xs text-gray-400 font-mono">ID: {u._id.substring(0, 8)}...</span>
                                 </td>
                                 <td className="px-6 py-4">
                                     <div className="flex items-center gap-2">
@@ -296,7 +321,7 @@ const UserManager = () => {
                                 <td className="px-6 py-4 text-right">
                                     {u.role !== 'admin' && (
                                         <button 
-                                            onClick={() => handleStatusToggle(u.id, u.status || 'active')}
+                                            onClick={() => handleStatusToggle(u._id, u.status || 'active')}
                                             className={`p-2 rounded-lg transition-all ${u.status === 'suspended' ? 'text-green-500 hover:bg-green-500/10' : 'text-gray-400 hover:text-red-500 hover:bg-red-500/10'}`}
                                             title={u.status === 'suspended' ? 'Reactivate' : 'Suspend'}
                                         >

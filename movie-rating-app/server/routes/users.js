@@ -80,4 +80,36 @@ router.post('/upgrade', async (req, res) => {
   }
 });
 
+// PUT update user status
+router.put('/:id/status', async (req, res) => {
+  try {
+    const { status } = req.body;
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { new: true }
+    ).select('-password');
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found',
+      });
+    }
+
+    res.json({
+      success: true,
+      message: `User status updated to ${status}`,
+      data: user,
+    });
+  } catch (error) {
+    console.error('Error updating user status:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error updating user status',
+      error: error.message,
+    });
+  }
+});
+
 export default router;

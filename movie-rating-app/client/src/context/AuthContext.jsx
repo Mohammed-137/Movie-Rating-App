@@ -122,13 +122,14 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Admin specific user management
-  const updateUserStatus = (userId, status) => {
-    const registeredUsersData = localStorage.getItem('movieAppRegisteredUsers');
-    const registeredUsers = registeredUsersData ? JSON.parse(registeredUsersData) : [];
-    const updatedUsers = registeredUsers.map(u => 
-      u.id === userId ? { ...u, status } : u
-    );
-    localStorage.setItem('movieAppRegisteredUsers', JSON.stringify(updatedUsers));
+  const updateUserStatus = async (userId, status) => {
+    try {
+      await userAPI.updateStatus(userId, status);
+      return true;
+    } catch (error) {
+      console.error('Error updating user status:', error);
+      throw error;
+    }
   };
 
   const deleteReview = (movieId, reviewId) => {
