@@ -95,6 +95,16 @@ export const userAPI = {
     const response = await apiRequest(`/users/${id}`);
     return response.data;
   },
+
+  /**
+   * Update user status
+   */
+  updateStatus: async (id, status) => {
+    return await apiRequest(`/users/${id}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status }),
+    });
+  },
 };
 
 /**
