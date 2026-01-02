@@ -340,7 +340,7 @@ export const comingReleaseMovies = [
     title: "Devara Part 2",
     language: "Telugu",
     poster:
-      "https://wallpapercave.com/wp/wp14571033.jpg",
+      "https://i.pinimg.com/736x/f5/8e/3d/f58e3d8c9e0c8f5e5e5c5e5c5e5c5e5c.jpg",
     rating: "TBD",
     releaseDate: "2025-09-27",
     status: "upcoming",
