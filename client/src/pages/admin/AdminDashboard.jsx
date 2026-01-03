@@ -247,10 +247,9 @@ const UserManager = () => {
         fetchUsers();
     }, []);
 
-    const fetchUsers = async () => {
         try {
-            const data = await userAPI.getAll();
-            setUsers(data.data || []);
+            const res = await userAPI.getAll();
+            setUsers(res.data.data || []);
         } catch (error) {
             console.error('Failed to fetch users:', error);
         } finally {
