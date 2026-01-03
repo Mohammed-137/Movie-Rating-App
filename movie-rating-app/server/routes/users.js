@@ -180,9 +180,9 @@ router.post('/:id/favorites', async (req, res) => {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    const isFav = user.favorites.some(m => m.id === movie.id);
+    const isFav = user.favorites.some(m => String(m.id) === String(movie.id));
     if (isFav) {
-      user.favorites = user.favorites.filter(m => m.id !== movie.id);
+      user.favorites = user.favorites.filter(m => String(m.id) !== String(movie.id));
     } else {
       user.favorites.push(movie);
     }
@@ -190,8 +190,8 @@ router.post('/:id/favorites', async (req, res) => {
     await user.save();
     res.json({ success: true, data: user.favorites });
   } catch (error) {
-    console.error('Error updating favorites:', error);
-    res.status(500).json({ success: false, message: 'Error updating favorites' });
+    console.error('Error updating favorites:', error.stack || error);
+    res.status(500).json({ success: false, message: 'Error updating favorites', error: error.message });
   }
 });
 
@@ -205,9 +205,9 @@ router.post('/:id/watchLater', async (req, res) => {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    const isListed = user.watchLater.some(m => m.id === movie.id);
+    const isListed = user.watchLater.some(m => String(m.id) === String(movie.id));
     if (isListed) {
-      user.watchLater = user.watchLater.filter(m => m.id !== movie.id);
+      user.watchLater = user.watchLater.filter(m => String(m.id) !== String(movie.id));
     } else {
       user.watchLater.push(movie);
     }
@@ -215,8 +215,8 @@ router.post('/:id/watchLater', async (req, res) => {
     await user.save();
     res.json({ success: true, data: user.watchLater });
   } catch (error) {
-    console.error('Error updating watch list:', error);
-    res.status(500).json({ success: false, message: 'Error updating watch list' });
+    console.error('Error updating watch list:', error.stack || error);
+    res.status(500).json({ success: false, message: 'Error updating watch list', error: error.message });
   }
 });
 
