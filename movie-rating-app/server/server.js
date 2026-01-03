@@ -52,7 +52,6 @@ app.use('/api/movies', movieRoutes);
 app.use('/api/moderation', moderationRoutes);
 
 
-
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
