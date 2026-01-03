@@ -16,13 +16,17 @@ const app = express();
 
 // Middleware
 const corsOptions = {
-  origin: "https://movie-rating-backend-nx55.onrender.com",
+  origin: ["https://movie-rating-client-u1gh.onrender.com"],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 };
 
-// Enable pre-flight for all routes
+app.use(cors(corsOptions));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+
 
 
 // Connect to MongoDB
@@ -47,8 +51,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/movies', movieRoutes);
 app.use('/api/moderation', moderationRoutes);
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+
 
 // Error handling middleware
 app.use((err, req, res, next) => {
