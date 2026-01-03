@@ -14,25 +14,39 @@ dotenv.config();
 // Initialize Express app
 const app = express();
 
-// Middleware
-const corsOptions = {
-  origin: ['https://movie-rating-client-u1gh.onrender.com', 'http://localhost:5173'],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-};
-
-
-
-
-
 // Connect to MongoDB
 connectDB().then(() => {
   initAdmin();
 });
 
 // Middleware
+const corsOptions = {
+  origin: (origin, callback) => {
+    const allowedOrigins = [
+      'https://movie-rating-client-u1gh.onrender.com',
+      'http://localhost:5173'
+    ];
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.log('CORS Blocked for origin:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+  optionsSuccessStatus: 200
+};
+
+// Debug middleware
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.path} - Origin: ${req.get('origin')}`);
+  next();
+});
+
 app.use(cors(corsOptions));
+app.options('*', cors(corsOptions)); // Handle all preflight requests
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
