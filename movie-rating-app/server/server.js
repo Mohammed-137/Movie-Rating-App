@@ -6,6 +6,7 @@ import initAdmin from './utils/initAdmin.js';
 import userRoutes from './routes/users.js';
 import movieRoutes from './routes/movies.js';
 import authRoutes from './routes/auth.js';
+import moderationRoutes from './routes/moderation.js';
 
 // Load environment variables
 dotenv.config();
@@ -46,6 +47,7 @@ app.get('/', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/movies', movieRoutes);
+app.use('/api/moderation', moderationRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

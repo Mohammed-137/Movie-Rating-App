@@ -10,15 +10,8 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   
-  const [favorites, setFavorites] = useState(() => {
-    const stored = localStorage.getItem('movieAppFavorites');
-    return stored ? JSON.parse(stored) : [];
-  });
-
-  const [watchLater, setWatchLater] = useState(() => {
-    const stored = localStorage.getItem('movieAppWatchLater');
-    return stored ? JSON.parse(stored) : [];
-  });
+  const [favorites, setFavorites] = useState([]);
+  const [watchLater, setWatchLater] = useState([]);
 
   const [reviews, setReviews] = useState(() => {
     const stored = localStorage.getItem('movieAppReviews');
@@ -32,6 +25,8 @@ export const AuthProvider = ({ children }) => {
         try {
           const res = await authAPI.getMe();
           setUser(res.data);
+          setFavorites(res.data.favorites || []);
+          setWatchLater(res.data.watchLater || []);
         } catch {
           console.error('Session expired or invalid token');
           localStorage.removeItem('movieAppToken');
@@ -44,39 +39,35 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('movieAppFavorites', JSON.stringify(favorites));
+    // LocalStorage sync removed in favor of server-side storage
   }, [favorites]);
 
   useEffect(() => {
-    localStorage.setItem('movieAppWatchLater', JSON.stringify(watchLater));
+    // LocalStorage sync removed in favor of server-side storage
   }, [watchLater]);
 
   useEffect(() => {
     localStorage.setItem('movieAppReviews', JSON.stringify(reviews));
   }, [reviews]);
 
-  const toggleFavorite = (movie) => {
+  const toggleFavorite = async (movie) => {
     if (!user) return;
-    setFavorites(prev => {
-      const isFav = prev.some(m => m.id === movie.id);
-      if (isFav) {
-        return prev.filter(m => m.id !== movie.id);
-      } else {
-        return [...prev, movie];
-      }
-    });
+    try {
+      const res = await userAPI.toggleFavorite(user._id, movie);
+      setFavorites(res.data);
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+    }
   };
 
-  const toggleWatchLater = (movie) => {
+  const toggleWatchLater = async (movie) => {
     if (!user) return;
-    setWatchLater(prev => {
-      const isListed = prev.some(m => m.id === movie.id);
-      if (isListed) {
-        return prev.filter(m => m.id !== movie.id);
-      } else {
-        return [...prev, movie];
-      }
-    });
+    try {
+      const res = await userAPI.toggleWatchLater(user._id, movie);
+      setWatchLater(res.data);
+    } catch (error) {
+      console.error('Error toggling watch later:', error);
+    }
   };
 
   const addReview = (movieId, rating, text) => {
@@ -105,6 +96,8 @@ export const AuthProvider = ({ children }) => {
     const { token, ...userData } = res.data;
     localStorage.setItem('movieAppToken', token);
     setUser(userData);
+    setFavorites(userData.favorites || []);
+    setWatchLater(userData.watchLater || []);
     return userData;
   };
 
@@ -113,11 +106,15 @@ export const AuthProvider = ({ children }) => {
     const { token, ...userData } = res.data;
     localStorage.setItem('movieAppToken', token);
     setUser(userData);
+    setFavorites(userData.favorites || []);
+    setWatchLater(userData.watchLater || []);
     return userData;
   };
 
   const logout = () => {
     setUser(null);
+    setFavorites([]);
+    setWatchLater([]);
     localStorage.removeItem('movieAppToken');
   };
 

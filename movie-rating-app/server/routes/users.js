@@ -112,4 +112,112 @@ router.put('/:id/status', async (req, res) => {
   }
 });
 
+// DELETE user
+router.delete('/:id', async (req, res) => {
+  try {
+    const user = await User.findByIdAndDelete(req.params.id);
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found',
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'User deleted successfully',
+    });
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error deleting user',
+      error: error.message,
+    });
+  }
+});
+
+// PUT update user details
+router.put('/:id', async (req, res) => {
+  try {
+    const { name, email, role } = req.body;
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { name, email, role },
+      { new: true }
+    ).select('-password');
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found',
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'User updated successfully',
+      data: user,
+    });
+  } catch (error) {
+    console.error('Error updating user:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error updating user',
+      error: error.message,
+    });
+  }
+});
+
+// POST toggle favorite
+router.post('/:id/favorites', async (req, res) => {
+  try {
+    const { movie } = req.body;
+    const user = await User.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    const isFav = user.favorites.some(m => m.id === movie.id);
+    if (isFav) {
+      user.favorites = user.favorites.filter(m => m.id !== movie.id);
+    } else {
+      user.favorites.push(movie);
+    }
+
+    await user.save();
+    res.json({ success: true, data: user.favorites });
+  } catch (error) {
+    console.error('Error updating favorites:', error);
+    res.status(500).json({ success: false, message: 'Error updating favorites' });
+  }
+});
+
+// POST toggle watch later
+router.post('/:id/watchLater', async (req, res) => {
+  try {
+    const { movie } = req.body;
+    const user = await User.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    const isListed = user.watchLater.some(m => m.id === movie.id);
+    if (isListed) {
+      user.watchLater = user.watchLater.filter(m => m.id !== movie.id);
+    } else {
+      user.watchLater.push(movie);
+    }
+
+    await user.save();
+    res.json({ success: true, data: user.watchLater });
+  } catch (error) {
+    console.error('Error updating watch list:', error);
+    res.status(500).json({ success: false, message: 'Error updating watch list' });
+  }
+});
+
 export default router;
