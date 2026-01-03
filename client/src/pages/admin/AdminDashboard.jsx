@@ -247,6 +247,7 @@ const UserManager = () => {
         fetchUsers();
     }, []);
 
+    const fetchUsers = async () => {
         try {
             const res = await userAPI.getAll();
             setUsers(res.data.data || []);
