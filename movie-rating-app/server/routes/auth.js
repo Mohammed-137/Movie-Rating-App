@@ -16,6 +16,10 @@ const generateToken = (id) => {
 router.post('/register', async (req, res) => {
   const { name, email, password } = req.body;
 
+  if (!name || !email || !password) {
+    return res.status(400).json({ success: false, message: 'Please provide name, email and password' });
+  }
+
   try {
     const userExists = await User.findOne({ email });
 
@@ -45,7 +49,8 @@ router.post('/register', async (req, res) => {
       res.status(400).json({ success: false, message: 'Invalid user data' });
     }
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error('Registration error:', error);
+    res.status(500).json({ success: false, message: error.message || 'Server Error' });
   }
 });
 

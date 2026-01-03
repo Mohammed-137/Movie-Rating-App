@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { authAPI } from '../services/api';
+import { authAPI, userAPI } from '../services/api';
 
 const AuthContext = createContext();
 
@@ -55,7 +55,7 @@ export const AuthProvider = ({ children }) => {
     if (!user) return;
     try {
       const res = await userAPI.toggleFavorite(user._id, movie);
-      setFavorites(res.data);
+      setFavorites(res.data.data);
     } catch (error) {
       console.error('Error toggling favorite:', error);
     }
@@ -65,7 +65,7 @@ export const AuthProvider = ({ children }) => {
     if (!user) return;
     try {
       const res = await userAPI.toggleWatchLater(user._id, movie);
-      setWatchLater(res.data);
+      setWatchLater(res.data.data);
     } catch (error) {
       console.error('Error toggling watch later:', error);
     }
