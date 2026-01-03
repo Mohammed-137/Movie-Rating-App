@@ -31,6 +31,11 @@ connectDB().then(() => {
   initAdmin();
 });
 
+// Middleware
+app.use(cors(corsOptions));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 // Routes
 app.get('/', (req, res) => {
   res.json({
@@ -47,11 +52,6 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/movies', movieRoutes);
 app.use('/api/moderation', moderationRoutes);
-
-app.use(cors(corsOptions));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
 
 // Error handling middleware
 app.use((err, req, res, next) => {
