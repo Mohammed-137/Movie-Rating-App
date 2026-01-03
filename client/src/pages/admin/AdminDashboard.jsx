@@ -241,20 +241,22 @@ const UserManager = () => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const { updateUserStatus } = useAuth();
+    const [editingUser, setEditingUser] = useState(null);
 
     useEffect(() => {
-        const fetchUsers = async () => {
-            try {
-                const data = await userAPI.getAll();
-                setUsers(data);
-            } catch (error) {
-                console.error('Failed to fetch users:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchUsers();
     }, []);
+
+    const fetchUsers = async () => {
+        try {
+            const data = await userAPI.getAll();
+            setUsers(data.data || []);
+        } catch (error) {
+            console.error('Failed to fetch users:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleStatusToggle = async (userId, currentStatus) => {
         const newStatus = currentStatus === 'active' ? 'suspended' : 'active';
@@ -263,6 +265,30 @@ const UserManager = () => {
             setUsers(prev => prev.map(u => u._id === userId ? { ...u, status: newStatus } : u));
         } catch (error) {
             alert('Failed to update user status');
+        }
+    };
+
+    const handleDelete = async (userId) => {
+        if (!window.confirm('Are you sure you want to delete this user?')) return;
+        try {
+            await userAPI.delete(userId);
+            setUsers(prev => prev.filter(u => u._id !== userId));
+        } catch (error) {
+            console.error('Failed to delete user:', error);
+            alert('Failed to delete user');
+        }
+    };
+
+    const handleUpdateUser = async (e) => {
+        e.preventDefault();
+        try {
+            const { _id, ...data } = editingUser;
+            const res = await userAPI.update(_id, data);
+            setUsers(prev => prev.map(u => u._id === _id ? res.data.data : u));
+            setEditingUser(null);
+        } catch (error) {
+            console.error('Failed to update user:', error);
+            alert('Failed to update user');
         }
     };
 
@@ -275,15 +301,58 @@ const UserManager = () => {
     }
 
     return (
-        <div className="animate-vault-open">
+        <div className="animate-vault-open relative">
             <h2 className="text-2xl font-display font-bold text-white mb-8">User Surveillance</h2>
+            
+            {editingUser && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setEditingUser(null)}></div>
+                    <div className="relative glass-panel w-full max-w-lg p-8 rounded-[2rem] border border-white/10 animate-vault-open">
+                        <h3 className="text-xl font-bold text-white mb-6">Edit User Identity</h3>
+                        <form onSubmit={handleUpdateUser} className="space-y-4">
+                            <div>
+                                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block mb-2">Name</label>
+                                <input 
+                                    value={editingUser.name}
+                                    onChange={e => setEditingUser({...editingUser, name: e.target.value})}
+                                    className="w-full glass-panel bg-white/5 border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-primary"
+                                />
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block mb-2">Email</label>
+                                <input 
+                                    value={editingUser.email}
+                                    onChange={e => setEditingUser({...editingUser, email: e.target.value})}
+                                    className="w-full glass-panel bg-white/5 border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-primary"
+                                />
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block mb-2">Role</label>
+                                <select 
+                                    value={editingUser.role}
+                                    onChange={e => setEditingUser({...editingUser, role: e.target.value})}
+                                    className="w-full glass-panel bg-white/5 border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-primary appearance-none"
+                                >
+                                    <option value="user" className="bg-dark">User</option>
+                                    <option value="admin" className="bg-dark">Admin</option>
+                                </select>
+                            </div>
+                            <div className="flex justify-end gap-3 mt-6">
+                                <button type="button" onClick={() => setEditingUser(null)} className="px-4 py-2 text-sm text-gray-400 hover:text-white">Cancel</button>
+                                <button type="submit" className="bg-primary text-black px-6 py-2 rounded-xl font-bold text-sm">Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
             <div className="glass-panel rounded-3xl border border-white/10 overflow-hidden">
                 <table className="w-full text-left border-collapse">
                     <thead>
                         <tr className="border-b border-white/5 bg-white/5">
                             <th className="px-6 py-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest">Subscriber</th>
                             <th className="px-6 py-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest">Role</th>
-                            <th className="px-6 py-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest">Activity</th>
+                            <th className="px-6 py-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest">Data Streams</th>
                             <th className="px-6 py-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest">Status</th>
                             <th className="px-6 py-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest text-right">Actions</th>
                         </tr>
@@ -308,7 +377,14 @@ const UserManager = () => {
                                     </span>
                                 </td>
                                 <td className="px-6 py-4">
-                                    <span className="text-xs text-gray-400 font-mono">ID: {u._id.substring(0, 8)}...</span>
+                                    <div className="flex gap-2">
+                                        <span className="text-[10px] bg-white/5 px-2 py-1 rounded text-gray-400" title="Favorites">
+                                            Favs: {u.favorites?.length || 0}
+                                        </span>
+                                        <span className="text-[10px] bg-white/5 px-2 py-1 rounded text-gray-400" title="Watch Later">
+                                            WL: {u.watchLater?.length || 0}
+                                        </span>
+                                    </div>
                                 </td>
                                 <td className="px-6 py-4">
                                     <div className="flex items-center gap-2">
@@ -319,15 +395,31 @@ const UserManager = () => {
                                     </div>
                                 </td>
                                 <td className="px-6 py-4 text-right">
-                                    {u.role !== 'admin' && (
+                                    <div className="flex items-center justify-end gap-2">
+                                        {u.role !== 'admin' && (
+                                            <button 
+                                                onClick={() => handleStatusToggle(u._id, u.status || 'active')}
+                                                className={`p-2 rounded-lg transition-all ${u.status === 'suspended' ? 'text-green-500 hover:bg-green-500/10' : 'text-yellow-500 hover:bg-yellow-500/10'}`}
+                                                title={u.status === 'suspended' ? 'Reactivate' : 'Suspend'}
+                                            >
+                                                {u.status === 'suspended' ? <CheckCircle size={16} /> : <AlertCircle size={16} />}
+                                            </button>
+                                        )}
                                         <button 
-                                            onClick={() => handleStatusToggle(u._id, u.status || 'active')}
-                                            className={`p-2 rounded-lg transition-all ${u.status === 'suspended' ? 'text-green-500 hover:bg-green-500/10' : 'text-gray-400 hover:text-red-500 hover:bg-red-500/10'}`}
-                                            title={u.status === 'suspended' ? 'Reactivate' : 'Suspend'}
+                                            onClick={() => setEditingUser(u)}
+                                            className="p-2 hover:bg-white/5 rounded-lg text-gray-400 hover:text-white transition-all"
+                                            title="Edit Details"
                                         >
-                                            {u.status === 'suspended' ? <CheckCircle size={18} /> : <XCircle size={18} />}
+                                            <Edit size={16} />
                                         </button>
-                                    )}
+                                        <button 
+                                            onClick={() => handleDelete(u._id)}
+                                            className="p-2 hover:bg-red-500/10 rounded-lg text-gray-400 hover:text-red-500 transition-all"
+                                            title="Delete User"
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         ))}
@@ -338,68 +430,129 @@ const UserManager = () => {
     );
 };
 
+import { moderationAPI } from '../../services/api';
+
 const Moderation = () => {
-    const { reviews, deleteReview } = useAuth();
-    const { movies } = useMovies();
-    
-    // Flatten reviews for the table
-    const allReviews = Object.entries(reviews).flatMap(([movieId, movieReviews]) => {
-        const movie = movies.find(m => m.id.toString() === movieId.toString());
-        return movieReviews.map(r => ({ ...r, movieId, movieTitle: movie?.title || 'Unknown Movie' }));
-    });
+    const [items, setItems] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [newItem, setNewItem] = useState({ title: '', content: '', priority: 'medium' });
+
+    useEffect(() => {
+        fetchModerationItems();
+    }, []);
+
+    const fetchModerationItems = async () => {
+        try {
+            const res = await moderationAPI.getAll();
+            setItems(res.data.data || []);
+        } catch (error) {
+            console.error('Failed to fetch moderation items:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleAddItem = async (e) => {
+        e.preventDefault();
+        try {
+            const res = await moderationAPI.create(newItem);
+            setItems([res.data.data, ...items]);
+            setNewItem({ title: '', content: '', priority: 'medium' });
+        } catch (error) {
+            console.error('Failed to add item:', error);
+        }
+    };
+
+    const handleDeleteItem = async (id) => {
+        if (!window.confirm('Delete this note?')) return;
+        try {
+            await moderationAPI.delete(id);
+            setItems(items.filter(i => i._id !== id));
+        } catch (error) {
+            console.error('Failed to delete item:', error);
+        }
+    };
+
+    if (loading) return <div className="text-white text-center py-20">Loading Protocols...</div>;
 
     return (
-        <div className="animate-vault-open">
-            <h2 className="text-2xl font-display font-bold text-white mb-8">Review Moderation</h2>
-            <div className="glass-panel rounded-3xl border border-white/10 overflow-hidden">
-                <table className="w-full text-left border-collapse">
-                    <thead>
-                        <tr className="border-b border-white/5 bg-white/5">
-                            <th className="px-6 py-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest">Author</th>
-                            <th className="px-6 py-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest">Movie</th>
-                            <th className="px-6 py-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest">Rating</th>
-                            <th className="px-6 py-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest">Comment</th>
-                            <th className="px-6 py-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest text-right">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5">
-                        {allReviews.length > 0 ? allReviews.map((r) => (
-                            <tr key={r.id} className="hover:bg-white/[0.02] transition-colors group">
-                                <td className="px-6 py-4">
-                                    <div className="flex items-center gap-3">
-                                        <img src={r.userAvatar} className="w-8 h-8 rounded-full border border-white/10" alt="" />
-                                        <span className="text-sm font-bold text-white">{r.userName}</span>
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4">
-                                    <span className="text-xs text-gray-400 font-medium">{r.movieTitle}</span>
-                                </td>
-                                <td className="px-6 py-4">
-                                    <div className="flex items-center gap-1 text-yellow-500">
-                                        {[...Array(5)].map((_, i) => (
-                                            <svg key={i} className={`w-3 h-3 ${i < r.rating ? 'fill-current' : 'text-gray-600'}`} viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
-                                        ))}
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4">
-                                    <p className="text-xs text-gray-500 italic line-clamp-1 max-w-xs">"{r.text}"</p>
-                                </td>
-                                <td className="px-6 py-4 text-right">
-                                    <button 
-                                        onClick={() => deleteReview(r.movieId, r.id)}
-                                        className="p-2 hover:bg-red-500/10 rounded-lg text-gray-400 hover:text-red-500 transition-all"
+        <div className="animate-vault-open grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2">
+                <h2 className="text-2xl font-display font-bold text-white mb-8">Moderation Protocols & Notes</h2>
+                <div className="space-y-4">
+                    {items.map(item => (
+                        <div key={item._id} className="glass-panel p-6 rounded-2xl border border-white/5 hover:border-white/10 transition-all group relative">
+                             <div className="flex justify-between items-start mb-2">
+                                <div className="flex items-center gap-3">
+                                    <span className={`w-2 h-2 rounded-full ${item.priority === 'high' ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]' : item.priority === 'medium' ? 'bg-yellow-500' : 'bg-green-500'}`}></span>
+                                    <h3 className="text-lg font-bold text-white">{item.title}</h3>
+                                </div>
+                                <button 
+                                    onClick={() => handleDeleteItem(item._id)}
+                                    className="text-gray-600 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                                >
+                                    <Trash2 size={16} />
+                                </button>
+                             </div>
+                             <p className="text-gray-400 text-xs leading-relaxed font-mono">{item.content}</p>
+                             <div className="mt-4 text-[10px] text-gray-600 uppercase tracking-widest">
+                                {new Date(item.createdAt).toLocaleDateString()}
+                             </div>
+                        </div>
+                    ))}
+                    {items.length === 0 && (
+                        <div className="text-center py-12 text-gray-500 font-mono text-xs uppercase tracking-widest">
+                            No active protocols recorded
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            <div className="lg:col-span-1">
+                <div className="sticky top-8">
+                    <h2 className="text-xl font-display font-bold text-white mb-6">New Protocol</h2>
+                    <form onSubmit={handleAddItem} className="glass-panel p-6 rounded-[2rem] border border-white/10 space-y-4">
+                        <div>
+                            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block mb-2">Subject</label>
+                            <input
+                                required
+                                value={newItem.title}
+                                onChange={e => setNewItem({...newItem, title: e.target.value})}
+                                placeholder="e.g. User Audit Policy"
+                                className="w-full glass-panel bg-white/5 border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-primary"
+                            />
+                        </div>
+                        <div>
+                            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block mb-2">Directives</label>
+                            <textarea
+                                required
+                                value={newItem.content}
+                                onChange={e => setNewItem({...newItem, content: e.target.value})}
+                                placeholder="Enter details..."
+                                rows="6"
+                                className="w-full glass-panel bg-white/5 border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-primary resize-none"
+                            />
+                        </div>
+                        <div>
+                            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block mb-2">Priority Level</label>
+                            <div className="grid grid-cols-3 gap-2">
+                                {['low', 'medium', 'high'].map(p => (
+                                    <button
+                                        key={p}
+                                        type="button"
+                                        onClick={() => setNewItem({...newItem, priority: p})}
+                                        className={`py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${newItem.priority === p ? 'bg-primary text-black' : 'bg-white/5 text-gray-500 hover:text-white'}`}
                                     >
-                                        <Trash2 size={16} />
+                                        {p}
                                     </button>
-                                </td>
-                            </tr>
-                        )) : (
-                            <tr>
-                                <td colSpan="5" className="px-6 py-20 text-center text-gray-600 font-mono text-[10px] uppercase tracking-widest">No review metadata detected</td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
+                                ))}
+                            </div>
+                        </div>
+                        <button type="submit" className="w-full bg-white text-black py-3 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-gray-200 transition-colors mt-2">
+                            Save Protocol
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     );

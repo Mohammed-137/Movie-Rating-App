@@ -30,6 +30,26 @@ const userSchema = new mongoose.Schema({
     enum: ['active', 'suspended'],
     default: 'active',
   },
+  favorites: [{
+    id: Number,
+    title: String,
+    poster: String,
+    rating: Number,
+    genre: String,
+    language: String,
+    certification: String,
+    year: String
+  }],
+  watchLater: [{
+    id: Number,
+    title: String,
+    poster: String,
+    rating: Number,
+    genre: String,
+    language: String,
+    certification: String,
+    year: String
+  }],
   createdAt: {
     type: Date,
     default: Date.now,

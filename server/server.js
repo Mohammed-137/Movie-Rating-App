@@ -6,6 +6,7 @@ import initAdmin from './utils/initAdmin.js';
 import userRoutes from './routes/users.js';
 import movieRoutes from './routes/movies.js';
 import authRoutes from './routes/auth.js';
+import moderationRoutes from './routes/moderation.js';
 
 // Load environment variables
 dotenv.config();
@@ -15,16 +16,18 @@ const app = express();
 
 // Middleware
 const corsOptions = {
-  origin: true,
+  origin: ["https://movie-rating-client-u1gh.onrender.com"],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 };
 
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions)); // Enable pre-flight for all routes
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+
+
 
 // Connect to MongoDB
 connectDB().then(() => {
@@ -46,6 +49,9 @@ app.get('/', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/movies', movieRoutes);
+app.use('/api/moderation', moderationRoutes);
+
+
 
 // Error handling middleware
 app.use((err, req, res, next) => {
