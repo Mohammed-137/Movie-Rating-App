@@ -20,7 +20,7 @@ import {
 import { useMovies } from '../../context/MovieContext';
 import { useAuth } from '../../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
-import { userAPI } from '../../services/api';
+import { userAPI, moderationAPI } from '../../services/api';
 
 // Placeholder sub-components (will build these out next)
 const AddMovieForm = ({ isOpen, onClose, onSave, editingMovie = null }) => {
@@ -263,7 +263,7 @@ const UserManager = () => {
         try {
             await updateUserStatus(userId, newStatus);
             setUsers(prev => prev.map(u => u._id === userId ? { ...u, status: newStatus } : u));
-        } catch (error) {
+        } catch {
             alert('Failed to update user status');
         }
     };
@@ -430,7 +430,7 @@ const UserManager = () => {
     );
 };
 
-import { moderationAPI } from '../../services/api';
+
 
 const Moderation = () => {
     const [items, setItems] = useState([]);

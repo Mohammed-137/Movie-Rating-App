@@ -50,6 +50,7 @@ export const userAPI = {
   delete: (id) => api.delete(`users/${id}`),
   toggleFavorite: (id, movie) => api.post(`users/${id}/favorites`, { movie }),
   toggleWatchLater: (id, movie) => api.post(`users/${id}/watchLater`, { movie }),
+  upgradeSubscription: (userId) => api.post('users/upgrade', { userId }),
 };
 
 export const moderationAPI = {
