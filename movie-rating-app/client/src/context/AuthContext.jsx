@@ -142,8 +142,14 @@ export const AuthProvider = ({ children }) => {
     favorites, watchLater, reviews,
     toggleFavorite, toggleWatchLater, addReview, deleteReview,
     isFavorite, isWatchLater, updateUserStatus,
-    upgradeSubscription: () => {
-      setUser(prev => ({ ...prev, subscriptionTier: 'premium' }));
+    upgradeSubscription: async () => {
+      if (!user) return;
+      try {
+        await userAPI.upgradeSubscription(user._id);
+        setUser(prev => ({ ...prev, subscriptionTier: 'premium' }));
+      } catch (error) {
+        console.error('Error upgrading subscription:', error);
+      }
     }
   };
 
