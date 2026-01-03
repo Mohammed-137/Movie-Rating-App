@@ -18,6 +18,15 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Better error handling
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const message = error.response?.data?.message || error.message || 'Failed to connect';
+    return Promise.reject({ ...error, message });
+  }
+);
+
 export const authAPI = {
   login: (credentials) => api.post('/auth/login', credentials),
   register: (userData) => api.post('/auth/register', userData),

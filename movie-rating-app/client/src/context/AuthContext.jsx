@@ -24,9 +24,10 @@ export const AuthProvider = ({ children }) => {
       if (token) {
         try {
           const res = await authAPI.getMe();
-          setUser(res.data);
-          setFavorites(res.data.favorites || []);
-          setWatchLater(res.data.watchLater || []);
+          const userData = res.data.data;
+          setUser(userData);
+          setFavorites(userData.favorites || []);
+          setWatchLater(userData.watchLater || []);
         } catch {
           console.error('Session expired or invalid token');
           localStorage.removeItem('movieAppToken');
@@ -93,7 +94,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     const res = await authAPI.login({ email, password });
-    const { token, ...userData } = res.data;
+    const { token, ...userData } = res.data.data;
     localStorage.setItem('movieAppToken', token);
     setUser(userData);
     setFavorites(userData.favorites || []);
@@ -103,7 +104,7 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (name, email, password) => {
     const res = await authAPI.register({ name, email, password });
-    const { token, ...userData } = res.data;
+    const { token, ...userData } = res.data.data;
     localStorage.setItem('movieAppToken', token);
     setUser(userData);
     setFavorites(userData.favorites || []);

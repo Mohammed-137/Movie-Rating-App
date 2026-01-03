@@ -16,7 +16,7 @@ const app = express();
 
 // Middleware
 const corsOptions = {
-  origin: ["https://movie-rating-client-u1gh.onrender.com"],
+  origin: ['https://movie-rating-client-u1gh.onrender.com', 'http://localhost:5173'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
